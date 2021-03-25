@@ -1,0 +1,13 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "allowJs": true,
+    },
+    "include": [
+        // All Java- and TypeScript files within the project.
+        "**/*.ts",
+        "**/*.js",
+        // Lint all config files in the project. 
+        "**/.*"
+    ]
+}
