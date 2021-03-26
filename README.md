@@ -1,18 +1,10 @@
-# @isaac.frontend/testcafe-reporter-allure
-[![GitHub](https://img.shields.io/github/license/isaaceindhoven/testcafe-reporter-allure)](https://github.com/isaaceindhoven/testcafe-reporter-allure/blob/master/LICENSE) [![NPM downloads per week](https://img.shields.io/npm/dw/@isaac.frontend/testcafe-reporter-allure)](https://www.npmjs.com/package/@isaac.frontend/testcafe-reporter-allure) [![npm (scoped)](https://img.shields.io/npm/v/@isaac.frontend/testcafe-reporter-allure)](https://www.npmjs.com/package/@isaac.frontend/testcafe-reporter-allure) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+# @pablo.vasquez/testcafe-reporter-allure
 
-An [Allure](https://allure.qatools.ru/) reporter plugin for [TestCafé](https://devexpress.github.io/testcafe/).
+An [Allure](https://allure.qatools.ru/) reporter plugin for [TestCafé](https://devexpress.github.io/testcafe/), based on [Isaac's](https://github.com/isaaceindhoven/testcafe-reporter-allure) modifications.
 
 ## Documentation
 
-https://isaaceindhoven.github.io/testcafe-reporter-allure
-
-## Contributing
-
-There are multiple ways you can help improve this package: Reporting bug, suggesting features, and contributing code implementing said features and bug requests.
-
-More information can be found in [CONTRIBUTING](https://github.com/isaaceindhoven/testcafe-reporter-allure/blob/master/CONTRIBUTING.md).
+Isaac's documentation: https://isaaceindhoven.github.io/testcafe-reporter-allure
 
 ## License
-[MIT](https://github.com/isaaceindhoven/testcafe-reporter-allure/blob/master/LICENSE) © ISAAC E-commerce Solutions BV
-
+As we are basing our modifications on Isaac's work, our License as of yet would be [MIT](https://github.com/isaaceindhoven/testcafe-reporter-allure/blob/master/LICENSE)
