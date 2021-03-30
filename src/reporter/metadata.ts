@@ -1,12 +1,15 @@
 /* eslint-disable class-methods-use-this,array-callback-return */
-import { AllureTest, LabelName, LinkType, Severity } from 'allure-js-commons';
+import { AllureTest, LinkType, Severity } from 'allure-js-commons';
+import { LabelName, Priority } from './models'; 
 import { TestStep } from '../testcafe/step';
 import { loadReporterConfig } from '../utils/config';
 
 const reporterConfig = loadReporterConfig();
 
 export default class Metadata {
-  severity: Severity;
+  severity: string;
+
+  priority: Priority;
 
   description: string;
 
@@ -28,15 +31,24 @@ export default class Metadata {
 
   steps: TestStep[];
 
+  user_story: string;
+
+  test_case: string;
+
   otherMeta: Map<string, string>;
 
   constructor(meta?: any, test?: boolean) {
     this.otherMeta = new Map();
     if (meta) {
-      const { severity, description, issue, suite, epic, story, feature, flaky, steps, ...otherMeta } = meta;
+      const { severity, priority, description, issue, suite, epic, story, feature, flaky, steps, user_story, test_case, ...otherMeta } = meta;
 
+      //if (this.isValidEnumValue(severity, Severity)) {
       if (this.isValidEnumValue(severity, Severity)) {
         this.severity = severity;
+      }
+
+      if (this.isValidEnumValue(priority, Priority)) {
+        this.priority = priority;
       }
       if (this.isString(description)) {
         this.description = description;
@@ -66,6 +78,12 @@ export default class Metadata {
       if (steps) {
         this.steps = steps;
       }
+      if(this.isString(user_story)) {
+        this.user_story = user_story;
+      }
+      if(this.isString(test_case)) {
+        this.test_case = test_case;
+      }
       Object.keys(otherMeta).forEach((key) => {
         if (this.isString(otherMeta[key])) {
           this.otherMeta.set(key, otherMeta[key]);
@@ -86,13 +104,19 @@ export default class Metadata {
 
     // Labels only accept specific keys/names as valid, it will ignore all other labels
     // Other variabels have to be added as parameters or links.
-
-    // Only the first severity value is loaded.
     if (this.severity) {
       test.addLabel(LabelName.SEVERITY, this.severity);
     } else {
-      // If no severity is given, set the default severity
+      // If no priority is given, set the default priority
       test.addLabel(LabelName.SEVERITY, reporterConfig.META.SEVERITY);
+    }
+
+    // Only the first priority value is loaded.
+    if (this.priority) {
+      test.addLabel(LabelName.PRIORITY, this.priority);
+    } else {
+      // If no priority is given, set the default priority
+      test.addLabel(LabelName.PRIORITY, reporterConfig.META.PRIORITY);
     }
 
     // Tests can be added to multiple suites at the same time.
@@ -113,21 +137,37 @@ export default class Metadata {
     // BDD style notation, containing Epics, Features, and Stories can be added to the tests.
     // These labels work the same way as the suites containing 3 levels. These are in order: Epic -> Feature -> Story
     if (this.epic) {
+      let _epicID = this.epic.match(/\[(.*?)\]/);
       test.addLabel(LabelName.EPIC, this.epic);
+      if(_epicID)
+        test.addLink(`${reporterConfig.META.JIRA_URL}${_epicID[1]}`, `${reporterConfig.LABEL.EPIC}: ${_epicID[1]}`, LinkType.TMS);
     }
     if (this.feature) {
       test.addLabel(LabelName.FEATURE, this.feature);
     }
     if (this.story) {
+      let _usID = this.story.match(/\[(.*?)\]/);
       test.addLabel(LabelName.STORY, this.story);
+      if(_usID)
+        test.addLink(`${reporterConfig.META.JIRA_URL}${_usID[1]}`, `${reporterConfig.LABEL.STORY}: ${_usID[1]}`, LinkType.TMS);
+    }
+
+    if(!this.story && this.user_story) {
+      test.addLink(`${reporterConfig.META.JIRA_URL}${this.user_story}`, `${reporterConfig.LABEL.STORY}: ${this.user_story}`, LinkType.TMS);
     }
 
     if (this.issue) {
       test.addLink(
-        `${reporterConfig.META.ISSUE_URL}${this.issue}`,
+        `${reporterConfig.META.JIRA_URL}${this.issue}`,
         `${reporterConfig.LABEL.ISSUE}: ${this.issue}`,
-        LinkType.ISSUE,
+        LinkType.TMS,
       );
+    } else {
+      test.addLink(
+        `${reporterConfig.META.JIRA_URL}${this.test_case}`,
+        `${reporterConfig.LABEL.ISSUE}: ${this.test_case}`,
+        LinkType.TMS,
+      ) 
     }
 
     if (this.description) {
@@ -151,6 +191,9 @@ export default class Metadata {
     // Local metadata takes preference to merged metadata
     if (!this.severity && metadata.severity) {
       this.severity = metadata.severity;
+    }    
+    if (!this.priority && metadata.priority) {
+      this.priority = metadata.priority;
     }
     if (!this.description && metadata.description) {
       this.description = metadata.description;
@@ -173,6 +216,12 @@ export default class Metadata {
     }
     if (!this.feature && metadata.feature) {
       this.feature = metadata.feature;
+    }
+    if (!this.user_story && metadata.user_story) {
+      this.user_story = metadata.user_story;
+    }
+    if (!this.test_case && metadata.test_case) {
+      this.test_case = metadata.test_case;
     }
     if (metadata.flaky) {
       this.flaky = metadata.flaky;
