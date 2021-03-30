@@ -1,5 +1,5 @@
 {
-  "name": "@isaac.frontend/testcafe-reporter-allure",
+  "name": "@pablo.vasquez/tc-reporter-allure",
   "version": "1.0.1",
   "author": "ISAAC E-commerce Solutions BV",
   "license": "MIT",
@@ -12,12 +12,11 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/isaaceindhoven/testcafe-reporter-allure.git"
+    "url": "https://github.com/juanpablo-vasquez/tc-reporter-allure.git"
   },
   "bugs": {
-    "url": "https://github.com/isaaceindhoven/testcafe-reporter-allure/issues"
+    "url": "https://github.com/juanpablo-vasquez/tc-reporter-allure/issues"
   },
-  "homepage": "https://github.com/isaaceindhoven/testcafe-reporter-allure#readme",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",

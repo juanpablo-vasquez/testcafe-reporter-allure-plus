@@ -21,10 +21,13 @@ const defaultReporterConfig = {
 
   META: {
     SEVERITY: 'Normal',
-    ISSUE_URL: 'https://jira.example.nl/browse/',
+    PRIORITY: 'Medium',
+    JIRA_URL: 'https://jira.example.nl/browse/',
   },
   LABEL: {
-    ISSUE: 'JIRA Issue',
+    ISSUE: 'JIRA Test Case',
+    EPIC: 'JIRA Epic',
+    STORY: 'JIRA User Story',
     FLAKY: 'Flaky test',
     SCREENSHOT_MANUAL: 'Screenshot taken manually',
     SCREENSHOT_ON_FAIL: 'Screenshot taken on fail',
