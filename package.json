@@ -1,7 +1,7 @@
 {
-  "name": "@pablo.vasquez/tc-reporter-allure",
+  "name": "testcafe-reporter-allure-plus",
   "version": "1.0.1",
-  "author": "ISAAC E-commerce Solutions BV",
+  "author": "Pablo Vasquez",
   "license": "MIT",
   "description": "An Allure reporter plugin for TestCafé. Used to generate test reports for e2e-tests.",
   "keywords": [
@@ -12,10 +12,10 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/juanpablo-vasquez/tc-reporter-allure.git"
+    "url": "https://github.com/juanpablo-vasquez/testcafe-reporter-allure-plus.git"
   },
   "bugs": {
-    "url": "https://github.com/juanpablo-vasquez/tc-reporter-allure/issues"
+    "url": "https://github.com/juanpablo-vasquez/testcafe-reporter-allure-plus/issues"
   },
   "scripts": {
     "prebuild": "rimraf dist",
