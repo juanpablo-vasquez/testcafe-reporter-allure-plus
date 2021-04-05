@@ -157,5 +157,24 @@ test.meta({
 
 **Important**: Know that `issue`, `epic`, `feature` and `story` can generate links **ONLY** if they have the Jira ID encased in square brackets, for example: `epic: '[EX-00001] Example Epic Ticket'`, will generate a link to `[JIRA_URL]/EX-00001`
 
+### Steps
+
+With this reporter, `test-steps` can be defined to split a `test` into multiple step. The step function expects three values: the step name, the `TestController` and the actions taken within the step as a `TestControllerPromise`.
+
+````typescript
+import step from 'testcafe-reporter-allure-plus/dist/utils';
+
+test("Example test with steps", async t => {
+  await step("Add developer name to form", t, 
+    t.typeText("#developer-name", "Jhon Smith")
+  );
+  await step("Submit form and check result", t,
+    t.click("#submit-button")
+      .expect(Selector("#article-header").innerText)
+      .eql("Thank you, John Smith!")
+  );
+})
+````
+
 ## License
 As we are basing our modifications on Isaac's work, our License as of yet would be [MIT](https://github.com/isaaceindhoven/testcafe-reporter-allure/blob/master/LICENSE)
