@@ -18,9 +18,11 @@ import { TestStep } from '../testcafe/step';
 import { loadCategoriesConfig, loadReporterConfig } from '../utils/config';
 import addNewLine from '../utils/utils';
 import Metadata from './metadata';
+import { ErrorConfig } from './models';
 
 const reporterConfig = loadReporterConfig();
 const categoriesConfig: Category[] = loadCategoriesConfig();
+const ansiHTML = require('ansi-html');
 
 export default class AllureReporter {
   private runtime: AllureRuntime = null;
@@ -85,7 +87,8 @@ export default class AllureReporter {
     this.setCurrentTest(name, currentTest);
   }
 
-  public endTest(name: string, testRunInfo: TestRunInfo, meta: object): void {
+  public endTest(name: string, testRunInfo: TestRunInfo, meta: object, context: any): void {
+    let _this = this;
     let currentTest = this.getCurrentTest(name);
 
     // If no currentTest exists create a new one
@@ -93,7 +96,7 @@ export default class AllureReporter {
       this.startTest(name, meta);
       currentTest = this.getCurrentTest(name);
     }
-
+    const currentMetadata = new Metadata(meta, true);
     const hasErrors = !!testRunInfo.errs && !!testRunInfo.errs.length;
     const hasWarnings = !!testRunInfo.warnings && !!testRunInfo.warnings.length;
     const isSkipped = testRunInfo.skipped;
@@ -104,9 +107,23 @@ export default class AllureReporter {
     if (isSkipped) {
       currentTest.status = Status.SKIPPED;
     } else if (hasErrors) {
+      testRunInfo.errs.forEach(err => {
+        let errorFormatted = context.formatError(err);
+        let error = this.formatErrorObject(errorFormatted);
+        testMessages = addNewLine(testMessages, error.errorName);
+        testDetails = addNewLine(testDetails, ansiHTML(errorFormatted));
+        currentMetadata.addDescription("<br/><strong>Errors</strong><br/>"+ansiHTML(errorFormatted));
+      });
+      
+      /*let formattedErrorObject = this.formatErrorObject(formattedErrors[0]);
+
+      let errorName = formattedErrorObject.errorName;
+      let errorMessage = formattedErrorObject.errorMessage;
+      testMessages = addNewLine(testMessages, errorName + " " + errorMessage);
+      testDetails = addNewLine(testDetails, formattedErrors[0]);*/
       currentTest.status = Status.FAILED;
 
-      const mergedErrors = this.mergeErrors(testRunInfo.errs);
+      /*const mergedErrors = this.mergeErrors(testRunInfo.errs);
 
       mergedErrors.forEach((error: ErrorObject) => {
         if (error.errMsg) {
@@ -127,7 +144,7 @@ export default class AllureReporter {
         if (error.userAgent) {
           testDetails = addNewLine(testDetails, `User Agent(s): ${error.userAgent}`);
         }
-      });
+      });*/
     } else {
       currentTest.status = Status.PASSED;
     }
@@ -138,7 +155,7 @@ export default class AllureReporter {
       });
     }
 
-    const currentMetadata = new Metadata(meta, true);
+    
     if (testRunInfo.unstable) {
       currentMetadata.setFlaky();
     }
@@ -278,6 +295,23 @@ export default class AllureReporter {
       }
     }
     return null;
+  }
+
+  private formatErrorObject(errorText: string) {
+    let errorMessage = "";
+    let errorName = "";
+
+    if(errorText.indexOf(ErrorConfig.ASSERTION_ERROR) !== -1) {
+      errorName = ErrorConfig.ASSERTION_ERROR;
+      errorMessage = errorText.substring(0, errorText.indexOf("\n\n"));
+    } else if(errorText.indexOf(ErrorConfig.BEFORE_HOOK) !== -1) {
+      errorName = ErrorConfig.BEFORE_HOOK;
+      errorMessage = errorText.substring(ErrorConfig.BEFORE_HOOK.length, errorText.indexOf('\n\n'));
+    } else {
+      errorName = ErrorConfig.BROKEN_ERROR;
+      errorMessage = ErrorConfig.BROKEN_MESSAGE;
+    }
+    return { errorName: errorName, errorMessage: errorMessage };
   }
 
   private setCurrentTest(name: string, test: AllureTest): void {
