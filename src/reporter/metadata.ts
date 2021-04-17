@@ -11,7 +11,7 @@ export default class Metadata {
 
   priority: Priority;
 
-  description: string;
+  description: string = "";
 
   issue: string;
 

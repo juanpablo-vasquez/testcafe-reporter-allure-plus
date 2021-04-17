@@ -31,6 +31,5 @@ export enum Priority {
 export enum ErrorConfig {
     ASSERTION_ERROR = "AssertionError",
     BEFORE_HOOK = "- Error in test.before hook -\n",
-    BROKEN_ERROR = "BrokenTest",
-    BROKEN_MESSAGE = "This test has been broken"
+    UNHANDLED_EXCEPTION = "Unhandled Exception"
 }

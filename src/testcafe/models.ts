@@ -46,6 +46,19 @@ export interface ErrorObject {
   userAgent?: string;
 }
 
+export interface TestError {
+  title?: string;
+  errMsg?: string;
+  screenshotPath?: string;
+  userAgent?: string;
+  code?: string;
+  trace?: Array<Object>;
+  pretty?: string;
+  testRunPhase?: string;
+  isTestCafeError?: boolean;
+  callsite?: CallSite
+}
+
 export interface CallSite {
   filename?: string;
   lineNum?: string;
