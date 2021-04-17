@@ -11,7 +11,7 @@ export default class Metadata {
 
   priority: Priority;
 
-  description: string;
+  description: string = "";
 
   issue: string;
 
@@ -162,7 +162,9 @@ export default class Metadata {
         `${reporterConfig.LABEL.ISSUE}: ${this.issue}`,
         LinkType.TMS,
       );
-    } else {
+    } 
+    
+    if(!this.issue && this.test_case) {
       test.addLink(
         `${reporterConfig.META.JIRA_URL}${this.test_case}`,
         `${reporterConfig.LABEL.ISSUE}: ${this.test_case}`,
@@ -172,7 +174,9 @@ export default class Metadata {
 
     if (this.description) {
       /* eslint-disable-next-line no-param-reassign */
-      test.description = this.description;
+      let newDescription = this.description ? this.description.split("\n").join("<br/>")+ "<br/>" : this.description;
+      newDescription += this.priority ? "<br/><strong>"+ LabelName.PRIORITY +"</strong>: " + ((this.priority) ? this.priority : reporterConfig.META.PRIORITY) : "";
+      test.description = newDescription;
     }
 
     // Flaky is a boolean, only add to test if flaky is true.
@@ -237,6 +241,10 @@ export default class Metadata {
 
   public setFlaky() {
     this.flaky = true;
+  }
+
+  public addDescription(text: string) {
+    this.description += text
   }
 
   public getSteps(): TestStep[] | null {

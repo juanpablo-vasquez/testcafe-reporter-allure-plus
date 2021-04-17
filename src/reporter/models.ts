@@ -9,7 +9,7 @@ export enum LabelName {
     FEATURE = "feature",
     STORY = "story",
     SEVERITY = "severity",
-    PRIORITY = "priority",
+    PRIORITY = "Priority",
     TAG = "tag",
     OWNER = "owner",
     LEAD = "lead",
@@ -27,4 +27,9 @@ export enum Priority {
     MEDIUM = "medium",
     LOW = "low",
     LOWEST = "lowest"
+}
+export enum ErrorConfig {
+    ASSERTION_ERROR = "AssertionError",
+    BEFORE_HOOK = "- Error in test.before hook -\n",
+    UNHANDLED_EXCEPTION = "Unhandled Exception"
 }

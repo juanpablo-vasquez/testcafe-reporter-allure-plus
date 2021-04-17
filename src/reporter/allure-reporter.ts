@@ -13,14 +13,18 @@ import {
 } from 'allure-js-commons';
 import { v4 as uuid } from 'uuid';
 import * as fs from 'fs';
-import { ErrorObject, Screenshot, TestRunInfo } from '../testcafe/models';
+import { ErrorObject, Screenshot, TestError, TestRunInfo } from '../testcafe/models';
 import { TestStep } from '../testcafe/step';
 import { loadCategoriesConfig, loadReporterConfig } from '../utils/config';
 import addNewLine from '../utils/utils';
 import Metadata from './metadata';
+import { ErrorConfig } from './models';
+import stripAnsi from 'strip-ansi';
 
 const reporterConfig = loadReporterConfig();
 const categoriesConfig: Category[] = loadCategoriesConfig();
+const ansiHTML = require('ansi-html');
+const stripANSI = require('strip-ansi');
 
 export default class AllureReporter {
   private runtime: AllureRuntime = null;
@@ -85,7 +89,8 @@ export default class AllureReporter {
     this.setCurrentTest(name, currentTest);
   }
 
-  public endTest(name: string, testRunInfo: TestRunInfo, meta: object): void {
+  public endTest(name: string, testRunInfo: TestRunInfo, meta: object, context: any): void {
+    let _this = this;
     let currentTest = this.getCurrentTest(name);
 
     // If no currentTest exists create a new one
@@ -93,7 +98,7 @@ export default class AllureReporter {
       this.startTest(name, meta);
       currentTest = this.getCurrentTest(name);
     }
-
+    const currentMetadata = new Metadata(meta, true);
     const hasErrors = !!testRunInfo.errs && !!testRunInfo.errs.length;
     const hasWarnings = !!testRunInfo.warnings && !!testRunInfo.warnings.length;
     const isSkipped = testRunInfo.skipped;
@@ -104,41 +109,52 @@ export default class AllureReporter {
     if (isSkipped) {
       currentTest.status = Status.SKIPPED;
     } else if (hasErrors) {
+      let testErrors: Array<TestError> = [];
+      testRunInfo.errs.forEach(err => {
+        let errorFormatted = context.formatError(err);
+        let error = this.formatErrorObject(stripANSI(errorFormatted));
+        let tError: TestError = err;
+        tError.title = error.errorName + ": " + error.errorMessage;
+        tError.pretty = error.pretty;
+        testErrors.push(tError);
+      });
+
       currentTest.status = Status.FAILED;
 
-      const mergedErrors = this.mergeErrors(testRunInfo.errs);
+      const mergedErrors = this.mergeErrors(testErrors);
 
-      mergedErrors.forEach((error: ErrorObject) => {
-        if (error.errMsg) {
-          testMessages = addNewLine(testMessages, error.errMsg);
+      mergedErrors.forEach((error: TestError) => {
+        if (error.title) {
+          testMessages = addNewLine(testMessages, error.code ? error.code + " - " + error.title : error.title);
         }
 
-        // TODO: Add detailed error stacktrace
-        // How to convert CallSiteRecord to stacktrace?
-        const callSite = error.callsite;
-        if (callSite) {
-          if (callSite.filename) {
-            testDetails = addNewLine(testDetails, `File name: ${callSite.filename}`);
+        if(error.pretty) {
+          testDetails = addNewLine(testDetails, error.pretty);
+        } else {
+          if (error.callsite) {
+            if (error.callsite.filename) {
+              testDetails = addNewLine(testDetails, `File name: ${error.callsite.filename}`);
+            }
+            if (error.callsite.lineNum) {
+              testDetails = addNewLine(testDetails, `Line number: ${error.callsite.lineNum}`);
+            }
           }
-          if (callSite.lineNum) {
-            testDetails = addNewLine(testDetails, `Line number: ${callSite.lineNum}`);
+          if (error.userAgent) {
+            testDetails = addNewLine(testDetails, `User Agent(s): ${error.userAgent}`);
           }
-        }
-        if (error.userAgent) {
-          testDetails = addNewLine(testDetails, `User Agent(s): ${error.userAgent}`);
         }
       });
     } else {
       currentTest.status = Status.PASSED;
     }
 
-    if (hasWarnings) {
+    //if (hasWarnings) {
       testRunInfo.warnings.forEach((warning: string) => {
         testMessages = addNewLine(testMessages, warning);
       });
-    }
+    //}
 
-    const currentMetadata = new Metadata(meta, true);
+    
     if (testRunInfo.unstable) {
       currentMetadata.setFlaky();
     }
@@ -248,13 +264,13 @@ export default class AllureReporter {
   }
 
   /* Merge the errors together based on their message. */
-  private mergeErrors(errors: ErrorObject[]): ErrorObject[] {
-    const mergedErrors: ErrorObject[] = [];
+  private mergeErrors(errors: TestError[]): TestError[] {
+    const mergedErrors: TestError[] = [];
     errors.forEach((error) => {
-      if (error && error.errMsg) {
+      if (error && error.title) {
         let errorExists: boolean = false;
         mergedErrors.forEach((mergedError) => {
-          if (error.errMsg === mergedError.errMsg) {
+          if (error.title === mergedError.title) {
             errorExists = true;
             if (error.userAgent && mergedError.userAgent !== error.userAgent) {
               /* eslint-disable-next-line no-param-reassign */
@@ -278,6 +294,23 @@ export default class AllureReporter {
       }
     }
     return null;
+  }
+
+  private formatErrorObject(errorText: string) {
+    let errorMessage = "";
+    let errorName = "";
+
+    if(errorText.indexOf(ErrorConfig.ASSERTION_ERROR) !== -1) {
+      errorName = ErrorConfig.ASSERTION_ERROR;
+      errorMessage = errorText.substring(ErrorConfig.ASSERTION_ERROR.length + 2, errorText.indexOf("\n\n"));
+    } else if(errorText.indexOf(ErrorConfig.BEFORE_HOOK) !== -1) {
+      errorName = ErrorConfig.BEFORE_HOOK;
+      errorMessage = errorText.substring(ErrorConfig.BEFORE_HOOK.length, errorText.indexOf('\n\n'));
+    } else {
+      errorName = ErrorConfig.UNHANDLED_EXCEPTION;
+      errorMessage = errorText.substring(0, errorText.indexOf("\n\n"));
+    }
+    return { errorName: errorName, errorMessage: errorMessage, pretty: errorText.substring(errorText.indexOf("\n\n"))};
   }
 
   private setCurrentTest(name: string, test: AllureTest): void {

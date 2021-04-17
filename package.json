@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-allure-plus",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "author": "Pablo Vasquez",
   "license": "MIT",
   "description": "An Allure reporter plugin for TestCafé. Used to generate test reports for e2e-tests.",
@@ -44,6 +44,7 @@
     "allure-js-commons": "^2.0.0-beta.8",
     "merge-anything": "^4.0.0",
     "rimraf": "^3.0.2",
+    "strip-ansi": "^6.0.0",
     "uuid": "^8.3.1"
   },
   "devDependencies": {

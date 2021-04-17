@@ -45,7 +45,7 @@ export default function () {
     async reportTestDone(name: string, testRunInfo: TestRunInfo, meta: object): Promise<void> {
       log(this, `Ending Test: ${name}`);
 
-      this.allureReporter.endTest(name, testRunInfo, meta);
+      this.allureReporter.endTest(name, testRunInfo, meta, this);
     },
 
     async reportTaskDone(endTime: Date, passed: number, warnings: string[], result: object): Promise<void> {
