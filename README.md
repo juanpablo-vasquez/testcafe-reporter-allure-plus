@@ -7,14 +7,14 @@ An [Allure](https://allure.qatools.ru/) reporter plugin for [TestCafé](https://
 
 ## TODO
 
-- [ ] Publish package to npm
+- [x] Publish package to npm
 - [x] Update config file `allure.config.js` to only have one base URL
 - [x] Add specific metatags `user_story` and `test_case`
 - [x] Generate links for `epic` and `feature` if they are present
 - [x] Generate links for `issue` if present, otherwise use `test_case`
 - [x] Generate links for `story` if present, otherwise use `user_story`
-- [ ] Verify is truthy and reliable
-- [ ] Research and possibly expand the displayment of errors inside the failed tests
+- [x] Verify is truthy and reliable
+- [x] Research and possibly expand the displayment of errors inside the failed tests - Missing await errors are still ghosting the reporter
 - [ ] Research the posibility of logs as attachments inside steps and tests in general
 
 ## Documentation
