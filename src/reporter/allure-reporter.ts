@@ -23,8 +23,8 @@ import stripAnsi from 'strip-ansi';
 
 const reporterConfig = loadReporterConfig();
 const categoriesConfig: Category[] = loadCategoriesConfig();
-const ansiHTML = require('ansi-html');
-const stripANSI = require('strip-ansi');
+//const stripAnsi = require("strip-ansi");
+
 
 export default class AllureReporter {
   private runtime: AllureRuntime = null;
@@ -112,7 +112,7 @@ export default class AllureReporter {
       let testErrors: Array<TestError> = [];
       testRunInfo.errs.forEach(err => {
         let errorFormatted = context.formatError(err);
-        let error = this.formatErrorObject(stripANSI(errorFormatted));
+        let error = this.formatErrorObject(stripAnsi(errorFormatted));
         let tError: TestError = err;
         tError.title = error.errorName + ": " + error.errorMessage;
         tError.pretty = error.pretty;
