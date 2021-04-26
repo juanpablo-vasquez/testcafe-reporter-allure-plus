@@ -247,6 +247,10 @@ export default class Metadata {
     this.description += text
   }
 
+  public addOtherMeta(key: string, value: string) {
+    this.otherMeta.set(key, value);
+  }
+
   public getSteps(): TestStep[] | null {
     if (this.steps) {
       return this.steps;

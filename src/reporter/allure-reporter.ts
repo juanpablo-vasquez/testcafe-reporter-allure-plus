@@ -106,6 +106,13 @@ export default class AllureReporter {
     let testMessages: string = '';
     let testDetails: string = '';
 
+    //Adding userAgent to Test
+    currentMetadata.addDescription("<br/><strong>User Agent:</strong> ")
+    testRunInfo.browsers.forEach(browser => {
+      currentMetadata.addDescription(browser.prettyUserAgent);
+      currentMetadata.addOtherMeta("browser", browser.prettyUserAgent);
+    });
+
     if (isSkipped) {
       currentTest.status = Status.SKIPPED;
     } else if (hasErrors) {
