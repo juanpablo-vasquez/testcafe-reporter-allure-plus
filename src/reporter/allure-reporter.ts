@@ -58,7 +58,7 @@ export default class AllureReporter {
     // Best to call this function in reporterTaskEnd and to write it as the last thing.
     this.runtime.writeCategoriesDefinitions(categoriesConfig);
     if (this.userAgents) {
-      this.runtime.writeEnvironmentInfo({ browsers: this.userAgents.toString() });
+      this.runtime.writeEnvironmentInfo({ Browsers: this.userAgents.toString() });
     }
   }
 
@@ -105,6 +105,13 @@ export default class AllureReporter {
 
     let testMessages: string = '';
     let testDetails: string = '';
+
+    //Adding userAgent to Test
+    currentMetadata.addDescription("<br/><strong>User Agent:</strong> ")
+    testRunInfo.browsers.forEach(browser => {
+      currentMetadata.addDescription(browser.prettyUserAgent);
+      currentMetadata.addOtherMeta("browser", browser.prettyUserAgent);
+    });
 
     if (isSkipped) {
       currentTest.status = Status.SKIPPED;
