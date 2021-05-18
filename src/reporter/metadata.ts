@@ -37,11 +37,14 @@ export default class Metadata {
 
   otherMeta: Map<string, string>;
 
+  links: string[];
+
   constructor(meta?: any, test?: boolean) {
     this.otherMeta = new Map();
+    this.links = [];
     if (meta) {
       const { severity, priority, description, issue, suite, epic, story, feature, flaky, steps, user_story, test_case, ...otherMeta } = meta;
-
+      
       //if (this.isValidEnumValue(severity, Severity)) {
       if (this.isValidEnumValue(severity, Severity)) {
         this.severity = severity;
@@ -140,7 +143,7 @@ export default class Metadata {
       let _epicID = this.epic.match(/\[(.*?)\]/);
       test.addLabel(LabelName.EPIC, this.epic);
       if(_epicID)
-        test.addLink(`${reporterConfig.META.JIRA_URL}${_epicID[1]}`, `${reporterConfig.LABEL.EPIC}: ${_epicID[1]}`, LinkType.TMS);
+        this.addLink(`${reporterConfig.META.JIRA_URL}${_epicID[1]}`, `${reporterConfig.LABEL.EPIC}: ${_epicID[1]}`, "bolt");
     }
     if (this.feature) {
       test.addLabel(LabelName.FEATURE, this.feature);
@@ -149,42 +152,55 @@ export default class Metadata {
       let _usID = this.story.match(/\[(.*?)\]/);
       test.addLabel(LabelName.STORY, this.story);
       if(_usID)
-        test.addLink(`${reporterConfig.META.JIRA_URL}${_usID[1]}`, `${reporterConfig.LABEL.STORY}: ${_usID[1]}`, LinkType.TMS);
+        this.addLink(`${reporterConfig.META.JIRA_URL}${_usID[1]}`, `${reporterConfig.LABEL.STORY}: ${_usID[1]}`, "bookmark");
     }
 
     if(!this.story && this.user_story) {
-      test.addLink(`${reporterConfig.META.JIRA_URL}${this.user_story}`, `${reporterConfig.LABEL.STORY}: ${this.user_story}`, LinkType.TMS);
+      this.addLink(`${reporterConfig.META.JIRA_URL}${this.user_story}`, `${reporterConfig.LABEL.STORY}: ${this.user_story}`, "bookmark");
     }
 
     if (this.issue) {
-      test.addLink(
+      (this.issue.split(",")).forEach((issue) => {
+        this.addLink(
+          `${reporterConfig.META.JIRA_URL}${issue}`,
+          `${reporterConfig.LABEL.ISSUE}: ${issue}`,
+          "check-square",
+        )
+      })
+      /*test.addLink(
         `${reporterConfig.META.JIRA_URL}${this.issue}`,
         `${reporterConfig.LABEL.ISSUE}: ${this.issue}`,
         LinkType.TMS,
-      );
+      );*/
     } 
     
     if(!this.issue && this.test_case) {
-      test.addLink(
+      this.addLink(
         `${reporterConfig.META.JIRA_URL}${this.test_case}`,
         `${reporterConfig.LABEL.ISSUE}: ${this.test_case}`,
-        LinkType.TMS,
+        "check-square",
       ) 
     }
 
-    if (this.description) {
-      /* eslint-disable-next-line no-param-reassign */
-      let newDescription = this.description ? this.description.split("\n").join("<br/>")+ "<br/>" : this.description;
-      newDescription += this.priority ? "<br/><strong>"+ LabelName.PRIORITY +"</strong>: " + ((this.priority) ? this.priority : reporterConfig.META.PRIORITY) : "";
-      test.description = newDescription;
-    }
-
+    
     // Flaky is a boolean, only add to test if flaky is true.
     if (this.flaky) {
       // TODO: Add flaky correctly to allure instead of as a parameter
       // However currenly allure-js-commons does not seem to support flaky tests.
       test.addParameter(reporterConfig.LABEL.FLAKY, this.flaky.toString());
     }
+
+    if (this.description) {
+      /* eslint-disable-next-line no-param-reassign */
+      let newDescription = this.description ? this.description.split("\n").join("<br/>")+ "<br/>" : this.description;
+      newDescription += this.priority ? "<br/><strong>"+ LabelName.PRIORITY +"</strong>: " + ((this.priority) ? this.priority : reporterConfig.META.PRIORITY) : "";
+      newDescription += "<h3 class='pane__section-title'>Links</h3>";
+      this.links.forEach(link => {
+        newDescription += link + "<br/>";
+      })
+      test.description = newDescription;
+    }
+
 
     Array.from(this.otherMeta.entries()).map((entry) => {
       test.addParameter(entry[0], entry[1]);
@@ -245,6 +261,10 @@ export default class Metadata {
 
   public addDescription(text: string) {
     this.description += text
+  }
+
+  public addLink(url: string, text: string, icon: string) {
+    this.links.push(`<a class='link' href='${url}' target='_blank'><i class='fa fa-${icon}'></i>${' ' + text}</a>`);
   }
 
   public addOtherMeta(key: string, value: string) {
