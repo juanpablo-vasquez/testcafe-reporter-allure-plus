@@ -9,6 +9,7 @@ const defaultReporterConfig = {
   RESULT_DIR: './allure/allure-results',
   REPORT_DIR: './allure/allure-report',
   SCREENSHOT_DIR: './allure/screenshots',
+  FILE_DIR: './allure/files',
 
   CLEAN_RESULT_DIR: true,
   CLEAN_REPORT_DIR: true,

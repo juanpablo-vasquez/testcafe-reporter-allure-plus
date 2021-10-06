@@ -77,3 +77,10 @@ export interface CallSite {
   filename?: string;
   lineNum?: string;
 }
+
+export interface Attachment {
+  name: string;
+  contentType: 'JSON' | 'TEXT' | 'PNG';
+  content: string;
+  path?: string;
+}

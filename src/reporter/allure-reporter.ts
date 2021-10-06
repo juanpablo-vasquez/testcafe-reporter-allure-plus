@@ -19,6 +19,7 @@ import { loadCategoriesConfig, loadReporterConfig } from '../utils/config';
 import addNewLine from '../utils/utils';
 import Metadata from './metadata';
 import { ErrorConfig } from './models';
+import { Attachment } from '../testcafe/models';
 import stripAnsi from 'strip-ansi';
 
 const reporterConfig = loadReporterConfig();
@@ -135,7 +136,7 @@ export default class AllureReporter {
           testMessages = addNewLine(testMessages, error.code ? error.code + " - " + error.title : error.title);
         }
 
-        if(error.pretty) {
+        if (error.pretty) {
           testDetails = addNewLine(testDetails, error.pretty);
         } else {
           if (error.callsite) {
@@ -156,12 +157,12 @@ export default class AllureReporter {
     }
 
     //if (hasWarnings) {
-      testRunInfo.warnings.forEach((warning: string) => {
-        testMessages = addNewLine(testMessages, warning);
-      });
+    testRunInfo.warnings.forEach((warning: string) => {
+      testMessages = addNewLine(testMessages, warning);
+    });
     //}
 
-    
+
     if (testRunInfo.unstable) {
       currentMetadata.setFlaky();
     }
@@ -169,6 +170,7 @@ export default class AllureReporter {
       testMessages = addNewLine(testMessages, reporterConfig.LABEL.FLAKY);
     }
     currentMetadata.addMetadataToTest(currentTest, this.groupMetadata);
+
 
     // If steps exist handle them, if not add screenshots to base of the test.
     const testSteps: TestStep[] = currentMetadata.getSteps();
@@ -199,12 +201,14 @@ export default class AllureReporter {
     for (let i = 0; i < stepAmount; i += 1) {
       const testStep: TestStep = mergedSteps[i];
       const allureStep: AllureStep = test.startStep(testStep.name);
-
+      if (testStep.attachments.length > 0) {
+        testStep.attachments.forEach(attachment => this.addStepAttachment(allureStep,  attachment));
+      }
       if (testStep.screenshotAmount && testStep.screenshotAmount > 0) {
         for (let j = 0; j < testStep.screenshotAmount; j += 1) {
           const screenshot: Screenshot = testRunInfo.screenshots[screenshotIndex];
-
-          this.addScreenshotAttachment(allureStep, screenshot);
+          if (screenshot)
+            this.addScreenshotAttachment(allureStep, screenshot);
 
           screenshotIndex += 1;
         }
@@ -230,6 +234,12 @@ export default class AllureReporter {
         this.addScreenshotAttachment(test, screenshot);
       });
     }
+  }
+
+  private addStepAttachment(test: ExecutableItemWrapper, attachment: Attachment): void {
+    const file = fs.readFileSync(attachment.path);
+    const allureFile = this.runtime.writeAttachment(file, ContentType[attachment.contentType]);
+    test.addAttachment(attachment.name, ContentType.JSON, allureFile);
   }
 
   private addScreenshotAttachment(test: ExecutableItemWrapper, screenshot: Screenshot): void {
@@ -263,7 +273,7 @@ export default class AllureReporter {
           stepExists = mergedStep.mergeOnSameName(step);
         });
         if (!stepExists) {
-          mergedSteps.push(new TestStep(step.name, step.screenshotAmount));
+          mergedSteps.push(new TestStep(step.name, step.screenshotAmount, step.attachments));
         }
       }
     });
@@ -307,17 +317,17 @@ export default class AllureReporter {
     let errorMessage = "";
     let errorName = "";
 
-    if(errorText.indexOf(ErrorConfig.ASSERTION_ERROR) !== -1) {
+    if (errorText.indexOf(ErrorConfig.ASSERTION_ERROR) !== -1) {
       errorName = ErrorConfig.ASSERTION_ERROR;
       errorMessage = errorText.substring(ErrorConfig.ASSERTION_ERROR.length + 2, errorText.indexOf("\n\n"));
-    } else if(errorText.indexOf(ErrorConfig.BEFORE_HOOK) !== -1) {
+    } else if (errorText.indexOf(ErrorConfig.BEFORE_HOOK) !== -1) {
       errorName = ErrorConfig.BEFORE_HOOK;
       errorMessage = errorText.substring(ErrorConfig.BEFORE_HOOK.length, errorText.indexOf('\n\n'));
     } else {
       errorName = ErrorConfig.UNHANDLED_EXCEPTION;
       errorMessage = errorText.substring(0, errorText.indexOf("\n\n"));
     }
-    return { errorName: errorName, errorMessage: errorMessage, pretty: errorText.substring(errorText.indexOf("\n\n"))};
+    return { errorName: errorName, errorMessage: errorMessage, pretty: errorText.substring(errorText.indexOf("\n\n")) };
   }
 
   private setCurrentTest(name: string, test: AllureTest): void {
