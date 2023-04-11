@@ -8,6 +8,7 @@ export enum LabelName {
     EPIC = "epic",
     FEATURE = "feature",
     STORY = "story",
+    BUG = "bug",
     SEVERITY = "severity",
     PRIORITY = "Priority",
     TAG = "tag",
