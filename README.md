@@ -13,6 +13,7 @@ An [Allure](https://allure.qatools.ru/) reporter plugin for [TestCafé](https://
 - [x] Generate links for `epic` and `feature` if they are present
 - [x] Generate links for `issue` if present, otherwise use `test_case`
 - [x] Generate links for `story` if present, otherwise use `user_story`
+- [x] Generate links for `bug` if present 
 - [x] Verify is truthy and reliable
 - [x] Research and possibly expand the displayment of errors inside the failed tests - Missing await errors are still ghosting the reporter
 - [ ] Research the posibility of logs as attachments inside steps and tests in general
